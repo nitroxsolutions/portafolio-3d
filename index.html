@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Portafolio 3D · Motion graphics, 3D e IA</title>
+  <meta name="description" content="Maneja el jeep por el mundo 3D y descubre proyectos, empresas y logros.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+  </script>
+</head>
+<body>
+  <div id="scene"></div>
+
+  <div id="loader"><div class="ring"></div><p id="loadtxt">Cargando el mundo… 0%</p></div>
+
+  <div id="hint">
+    <span><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> manejar</span>
+    <span><kbd>Espacio</kbd> frenar</span>
+    <span>arrastra para girar · rueda para acercar</span>
+  </div>
+  <div id="speed"><span id="kmh">0</span> km/h</div>
+
+  <aside id="card" aria-live="polite">
+    <button class="cerrar" id="cardClose" aria-label="Cerrar">×</button>
+    <div class="tag" id="cardTag"></div>
+    <h2 id="cardTitle"></h2>
+    <div id="cardBody"></div>
+  </aside>
+
+  <button id="creditos-btn">Créditos</button>
+  <div id="creditos">
+    Modelos 3D: <a href="https://kenney.nl" target="_blank" rel="noopener">Kenney</a> (Nature Kit, Fantasy Town Kit y Survival Kit, CC0).<br>
+    "Wet Floor Sign" de <a href="https://sketchfab.com/3d-models/wet-floor-sign-d340f904c4684645a4e5282b5fbe963b" target="_blank" rel="noopener">louis-muir</a> (CC BY 4.0).<br>
+    Hecho con three.js.
+  </div>
+
+  <div id="touch">
+    <button data-k="left" aria-label="Izquierda">◀</button>
+    <button data-k="up" aria-label="Acelerar">▲</button>
+    <button data-k="down" aria-label="Reversa">▼</button>
+    <button data-k="right" aria-label="Derecha">▶</button>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
