@@ -272,7 +272,50 @@ loader.load('assets/jeep_rubicon.glb', (gltf) => {
   });
   for (const w of Object.values(wheels)) if (w) w.rotation.order = 'ZYX';   // primero rueda (X), luego direccion (Z)
   tilt.add(m);
+  // garage: piezas del techo, ventanas traseras y pintura de carrocería
+  m.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(m.matrixWorld).invert();
+  m.traverse(o => {
+    if (!o.isMesh) return;
+    const name = ([].concat(o.material)[0] || {}).name || '';
+    if (name.startsWith('jeeptop')) jeepParts.top.push(o);
+    if (name === 'Body') for (const mt of [].concat(o.material)) if (!jeepParts.paint.includes(mt)) jeepParts.paint.push(mt);
+    if (name === 'windows') {
+      // sin techo: se queda solo el parabrisas (la parte más al frente, +z del modelo)
+      const g = o.geometry, pos = g.attributes.position, idx = g.index ? g.index.array : [...Array(pos.count).keys()];
+      const M = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld), v = new THREE.Vector3(), cz = [];
+      let zmax = -1e9;
+      for (let i = 0; i < idx.length; i += 3) { let z = 0; for (let k = 0; k < 3; k++) { v.fromBufferAttribute(pos, idx[i + k]).applyMatrix4(M); z += v.z / 3; } cz.push(z); zmax = Math.max(zmax, z); }
+      const keep = []; for (let i = 0; i < cz.length; i++) if (cz[i] > zmax - 0.16) keep.push(idx[i * 3], idx[i * 3 + 1], idx[i * 3 + 2]);
+      jeepParts.winFull = g; jeepParts.winFront = g.clone(); jeepParts.winFront.setIndex(keep); jeepParts.win = o;
+    }
+  });
+  jeepParts.original = jeepParts.paint.map(mt => mt.color.clone());
+  applyGarage();
 });
+// ------------------------------------------------------------------ garage: color y techo (se guarda en el navegador)
+const jeepParts = { top: [], paint: [], win: null, winFull: null, winFront: null, original: [] };
+const COLORS = { original: null, arena: 0xc9a46a, verde: 0x55663a, azul: 0x2c5fa8, naranja: 0xe0640f, blanco: 0xe9e6df, negro: 0x15171a };
+const garage = { color: 'original', techo: true };
+try { Object.assign(garage, JSON.parse(localStorage.getItem('garage') || '{}')); } catch (e) {}
+function applyGarage() {
+  jeepParts.paint.forEach((mt, i) => {
+    if (!('origMap' in mt.userData)) mt.userData.origMap = mt.map;
+    if (garage.color === 'original' || !COLORS[garage.color]) { mt.color.copy(jeepParts.original[i] || mt.color); mt.map = mt.userData.origMap; }
+    else { mt.map = null; mt.color.setHex(COLORS[garage.color]); mt.color.convertSRGBToLinear(); mt.metalness = 0.15; mt.roughness = 0.4; }   // la pintura nueva reemplaza la textura
+    mt.needsUpdate = true;
+  });
+  for (const o of jeepParts.top) o.visible = garage.techo;
+  if (jeepParts.win) jeepParts.win.geometry = garage.techo ? jeepParts.winFull : jeepParts.winFront;
+  document.querySelectorAll('#garage [data-color]').forEach(b => b.classList.toggle('on', b.dataset.color === garage.color));
+  const t = document.getElementById('techoBtn'); if (t) t.textContent = garage.techo ? 'Quitar techo' : 'Poner techo';
+  try { localStorage.setItem('garage', JSON.stringify(garage)); } catch (e) {}
+}
+document.getElementById('garageBtn').addEventListener('click', () => document.getElementById('garage').classList.toggle('show'));
+document.querySelectorAll('#garage [data-color]').forEach(b => b.addEventListener('click', () => { garage.color = b.dataset.color; applyGarage(); }));
+document.getElementById('techoBtn').addEventListener('click', () => { garage.techo = !garage.techo; applyGarage(); });
+if (params.get('color')) garage.color = params.get('color');          // pruebas: ?color=azul&techo=0
+if (params.get('techo') === '0') garage.techo = false;
 
 // letrero de piso mojado: obstaculo que se puede tumbar
 const sign = { obj: null, pos: new THREE.Vector3(0, 0, 7), vel: new THREE.Vector3(), yaw: 0.4, fall: 0, fallV: 0, axis: new THREE.Vector3(1, 0, 0), state: 'up', t: 0 };
