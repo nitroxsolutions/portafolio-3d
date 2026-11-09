@@ -294,7 +294,7 @@ document.querySelectorAll('#touch button').forEach(b => {
 });
 
 // ------------------------------------------------------------------ vehiculo (modelo de bicicleta arcade)
-const car = { x: 0, z: -8, heading: 0, speed: 0, steer: 0, spin: 0, pitch: 0, roll: 0, prevSpeed: 0 };
+const car = { x: 3.2, z: -8.6, heading: -0.35, speed: 0, steer: 0, spin: 0, pitch: 0, roll: 0, prevSpeed: 0 };
 const P = { maxF: 9.0, maxR: 3.5, accel: 7.5, brake: 16, drag: 0.55, roll: 1.8, maxSteer: 0.6, steerRate: 3.2 };
 const WORLD_R = 58;
 
